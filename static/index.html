@@ -400,7 +400,22 @@
             padding: 0.75rem 1rem;
             font-size: 0.85rem;
             color: var(--warning);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer-box {
+            background: var(--danger-bg-subtle);
+            border: 1px solid rgba(198, 45, 58, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
             margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .disclaimer-box strong {
+            color: var(--danger);
         }
 
         .btn-row {
@@ -577,6 +592,10 @@
                 This tool runs entirely in your browser. Your credentials never leave your device.
                 Use an <a href="https://bsky.app/settings/app-passwords" target="_blank" rel="noopener noreferrer" class="link-warning">app password</a> (not your main password).
                 Keep this tab open while cleanup runs.
+            </div>
+
+            <div class="disclaimer-box">
+                <strong>Use at your own risk.</strong> Deletion is permanent and irreversible. This tool is provided as-is with no warranty. You are solely responsible for any data loss resulting from its use.
             </div>
 
             <div class="card" id="login-card">
