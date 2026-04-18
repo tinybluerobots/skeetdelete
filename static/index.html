@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+    <title>SkeetDelete - Bluesky Repo Cleanup</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --surface: #16213e;
+            --surface2: #0f3460;
+            --primary: #0088a8;
+            --primary-hover: #007090;
+            --danger: #c62d3a;
+            --danger-hover: #a8232f;
+            --text: #e8e8e8;
+            --text-dim: #a0a0a0;
+            --text-inverse: #ffffff;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --border: #2a2a4a;
+            --danger-bg-subtle: rgba(198, 45, 58, 0.15);
+            --warning-bg-subtle: rgba(255, 159, 28, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.25rem;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.375rem;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus-visible,
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--primary);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-item span {
+            font-size: 0.875rem;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-row span {
+            font-size: 0.9rem;
+        }
+
+        .toggle-desc {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            transition: 0.2s;
+        }
+
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text);
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        .toggle input:focus-visible + .toggle-slider {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--text-inverse);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--danger-hover);
+        }
+
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--primary);
+        }
+
+        .progress-section {
+            display: none;
+        }
+
+        .progress-section.visible {
+            display: block;
+        }
+
+        .progress-bar-container {
+            background: var(--surface2);
+            border-radius: 8px;
+            height: 24px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 8px;
+            transition: width 0.3s;
+            min-width: 0;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        .status-line {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            min-height: 1.4em;
+        }
+
+        .error-box {
+            background: var(--danger-bg-subtle);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-box.visible {
+            display: block;
+        }
+
+        .warning-box {
+            background: var(--warning-bg-subtle);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: var(--warning);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+        }
+
+        #wasm-loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .app { display: none; }
+        .app.loaded { display: block; }
+
+        .result-card {
+            display: none;
+        }
+
+        .result-card.visible {
+            display: block;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .link-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .mt-1 { margin-top: 1rem; }
+        .hidden { display: none; }
+
+        .skip-nav {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary);
+            color: var(--text-inverse);
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 0 0 8px 0;
+        }
+        .skip-nav:focus {
+            top: 0;
+        }
+
+        .noscript-msg {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--danger);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f5f5f5;
+                --surface: #ffffff;
+                --surface2: #e8e8e8;
+                --text: #1a1a2e;
+                --text-dim: #666666;
+                --text-inverse: #ffffff;
+                --border: #d0d0d0;
+                --danger-bg-subtle: rgba(198, 45, 58, 0.08);
+                --warning-bg-subtle: rgba(255, 159, 28, 0.08);
+            }
+            .toggle-slider:before {
+                background: var(--text-dim);
+            }
+            .toggle input:checked + .toggle-slider:before {
+                background: var(--text-inverse);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 1rem 0.75rem; }
+            .card { padding: 1rem; }
+            .checkbox-group { grid-template-columns: 1fr; }
+            .progress-stats { grid-template-columns: 1fr 1fr; }
+            .btn-row { flex-direction: column; }
+            .btn-row .btn { width: 100%; }
+            .toggle-row { flex-wrap: wrap; gap: 0.5rem; }
+        }
+
+        @media (max-width: 360px) {
+            h1 { font-size: 1.5rem; }
+            .result-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-nav">Skip to main content</a>
+    <main id="main" aria-label="SkeetDelete">
+    <noscript><p class="noscript-msg">SkeetDelete requires JavaScript. Please enable JS in your browser.</p></noscript>
+    <div class="container">
+        <div id="wasm-loading">
+            <div class="spinner"></div>
+            <div>Loading SkeetDelete...</div>
+        </div>
+
+        <div class="app" id="app">
+            <h1>SkeetDelete</h1>
+            <p class="subtitle">Clean up your Bluesky repo — delete old likes, posts, reposts, and follows</p>
+
+            <div class="warning-box">
+                This tool runs entirely in your browser. Your credentials never leave your device.
+                Use an <a href="https://bsky.app/settings/app-passwords" target="_blank" rel="noopener noreferrer" class="link-warning">app password</a> (not your main password).
+                Keep this tab open while cleanup runs.
+            </div>
+
+            <div class="card" id="login-card">
+                <h2 id="login-heading">Sign In</h2>
+                <form id="login-form" aria-labelledby="login-heading" onsubmit="handleLogin(); return false;">
+                    <label for="identifier">Handle or Email</label>
+                    <input type="text" id="identifier" placeholder="you.bsky.social" autocomplete="username" required>
+                    <label for="password">App Password</label>
+                    <input type="password" id="password" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="current-password" required>
+                    <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">Sign In</button>
+                </form>
+            </div>
+
+            <div class="card hidden" id="config-card">
+                <h2>Cleanup Options</h2>
+                <label>What to delete:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" id="cb-like" name="cleanupType" value="like" checked><span>Likes</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="cb-repost" name="cleanupType" value="repost" checked><span>Reposts</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="cb-post" name="cleanupType" value="post"><span>Posts (text)</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="cb-post-media" name="cleanupType" value="post_with_media"><span>Posts (media)</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="cb-follow" name="cleanupType" value="follow"><span>Follows</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="cb-listitem" name="cleanupType" value="listitem"><span>List Items</span></label>
+                </div>
+
+                <label for="days-ago">Delete records older than (days)</label>
+                <input type="number" id="days-ago" value="90" min="1" max="3650">
+
+                <div class="toggle-row">
+                    <div>
+                        <span>Dry Run</span>
+                        <div class="toggle-desc">Preview what would be deleted without actually deleting</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="dry-run" role="switch" aria-checked="true" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="btn-start" onclick="handleStart()">Start Cleanup</button>
+                    <button class="btn btn-secondary" id="btn-signout" onclick="handleSignout()">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="progress-section" id="progress-section">
+                <div class="card">
+                    <h2 id="progress-title">Cleaning Up...</h2>
+                    <div class="error-box" id="error-box"></div>
+
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-bar"></div>
+                    </div>
+
+                    <div class="progress-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-found">0</div>
+                            <div class="stat-label">Found</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-deleted">0</div>
+                            <div class="stat-label">Deleted</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-remaining">0</div>
+                            <div class="stat-label">Remaining</div>
+                        </div>
+                    </div>
+
+                    <div class="status-line" id="status-line"></div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-danger" id="btn-cancel" onclick="handleCancel()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card" id="result-card">
+                <div class="card">
+                    <h2 id="result-title">Cleanup Complete</h2>
+                    <div class="result-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="result-found">0</div>
+                            <div class="stat-label">Records Found</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="result-deleted">0</div>
+                            <div class="stat-label">Records Deleted</div>
+                        </div>
+                    </div>
+                    <div class="status-line mt-1" id="result-message"></div>
+                    <button class="btn btn-primary mt-1" onclick="handleReset()">Done</button>
+                </div>
+            </div>
+
+            <footer>
+                SkeetDelete — <a href="https://github.com/jon-cooper/skeetdelete" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+            </footer>
+        </div>
+    </div>
+    </main>
+
+    <script src="wasm_exec.js"></script>
+    <script>
+        if (!WebAssembly.instantiateStreaming) {
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
+        let wasmInstance = null;
+        let progressInterval = null;
+
+        async function initWasm() {
+            // Toggle ARIA update
+            document.getElementById('dry-run').addEventListener('change', function() {
+                this.setAttribute('aria-checked', this.checked ? 'true' : 'false');
+            });
+            try {
+                const go = new Go();
+                const result = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);
+                go.run(result.instance);
+                wasmInstance = true;
+                document.getElementById('wasm-loading').classList.add('hidden');
+                document.getElementById('app').classList.add('loaded');
+            } catch (err) {
+                document.getElementById('wasm-loading').innerHTML =
+                    '<div class="text-danger">Failed to load: ' + err.message + '</div>';
+            }
+        }
+
+        function handleLogin() {
+            const identifier = document.getElementById('identifier').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!identifier || !password) {
+                showError('Please enter your handle and app password.');
+                return;
+            }
+            if (typeof skeetDelete === 'undefined') {
+                showError('WASM not loaded yet. Please wait.');
+                return;
+            }
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            skeetDelete(JSON.stringify({
+                action: 'login',
+                identifier: identifier,
+                appPassword: password
+            }));
+
+            const pollLogin = setInterval(() => {
+                const raw = skeetGetProgress();
+                if (!raw) return;
+                try {
+                    const p = JSON.parse(raw);
+                    if (p.state === 'login_pending') return;
+                    clearInterval(pollLogin);
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
+                    if (p.error) {
+                        showError(p.error);
+                    } else if (p.did) {
+                        document.getElementById('login-card').classList.add('hidden');
+                        document.getElementById('config-card').classList.remove('hidden');
+                    }
+                } catch(e) {
+                    clearInterval(pollLogin);
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
+                }
+            }, 200);
+        }
+
+        function handleStart() {
+            const types = [];
+            document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(cb => {
+                if (cb.checked) types.push(cb.value);
+            });
+            if (types.length === 0) {
+                showError('Select at least one record type.');
+                return;
+            }
+
+            const daysAgo = parseInt(document.getElementById('days-ago').value) || 90;
+            const dryRun = document.getElementById('dry-run').checked;
+
+            document.getElementById('config-card').classList.add('hidden');
+            document.getElementById('progress-section').classList.add('visible');
+            document.getElementById('result-card').classList.remove('visible');
+
+            const title = dryRun ? 'Scanning (Dry Run)...' : 'Cleaning Up...';
+            document.getElementById('progress-title').textContent = title;
+
+            skeetDelete(JSON.stringify({
+                action: 'cleanup',
+                cleanupTypes: types,
+                deleteUntilDaysAgo: daysAgo,
+                actuallyDelete: !dryRun
+            }));
+
+            progressInterval = setInterval(updateProgress, 500);
+        }
+
+        function handleCancel() {
+            if (typeof skeetCancel === 'function') {
+                skeetCancel();
+            }
+        }
+
+        function handleSignout() {
+            if (typeof skeetDelete === 'function') {
+                skeetDelete(JSON.stringify({ action: 'signout' }));
+            }
+            document.getElementById('login-card').classList.remove('hidden');
+            document.getElementById('config-card').classList.add('hidden');
+        }
+
+        function handleReset() {
+            document.getElementById('progress-section').classList.remove('visible');
+            document.getElementById('result-card').classList.remove('visible');
+            document.getElementById('config-card').classList.remove('hidden');
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function updateProgress() {
+            if (typeof skeetGetProgress !== 'function') return;
+            const raw = skeetGetProgress();
+            if (!raw) return;
+            const p = JSON.parse(raw);
+
+            document.getElementById('stat-found').textContent = p.records_found;
+            document.getElementById('stat-deleted').textContent = p.records_deleted;
+            document.getElementById('stat-remaining').textContent = Math.max(0, p.records_found - p.records_deleted);
+            document.getElementById('status-line').textContent = p.current_action || '';
+
+            const total = p.records_found;
+            const pct = total > 0 ? Math.round((p.records_deleted / total) * 100) : 0;
+            document.getElementById('progress-bar').style.width = pct + '%';
+
+            if (p.error_message) {
+                showError(p.error_message);
+            }
+
+            if (p.state === 'completed' || p.state === 'cancelled' || p.state === 'error') {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+                setTimeout(() => {
+                    document.getElementById('progress-section').classList.remove('visible');
+                    document.getElementById('result-card').classList.add('visible');
+                    document.getElementById('result-title').textContent =
+                        p.state === 'cancelled' ? 'Cancelled' : (p.is_dry_run ? 'Dry Run Complete' : 'Cleanup Complete');
+                    document.getElementById('result-found').textContent = p.records_found;
+                    document.getElementById('result-deleted').textContent = p.records_deleted;
+                    document.getElementById('result-message').textContent = p.current_action || '';
+                }, 500);
+            }
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('error-box');
+            box.textContent = msg;
+            box.classList.add('visible');
+            setTimeout(() => box.classList.remove('visible'), 8000);
+        }
+
+        initWasm();
+    </script>
+</body>
+</html>

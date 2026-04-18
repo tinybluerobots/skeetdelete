@@ -1,0 +1,60 @@
+[tools]
+go = "1.26"
+golangci-lint = "latest"
+
+[tasks.build]
+description = "Build production WASM (optimized, stripped)"
+run = """
+GOOS=js GOARCH=wasm go build -ldflags='-s -w' -trimpath -o static/main.wasm ./cmd/wasm
+if [ ! -f static/wasm_exec.js ]; then cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" static/wasm_exec.js; fi
+"""
+
+[tasks.build-debug]
+description = "Build debug WASM (with symbols)"
+run = """
+GOOS=js GOARCH=wasm go build -o static/main.wasm ./cmd/wasm
+if [ ! -f static/wasm_exec.js ]; then cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" static/wasm_exec.js; fi
+"""
+
+[tasks.compress]
+description = "Create gzip and brotli compressed WASM variants"
+depends = ["build"]
+run = """
+gzip -9 -k static/main.wasm
+brotli -k -q 11 static/main.wasm
+"""
+
+[tasks.serve]
+description = "Build and run development server"
+depends = ["build"]
+run = "go run ./cmd/serve"
+
+[tasks.clean]
+description = "Remove all build artifacts"
+run = "rm -f static/main.wasm static/main.wasm.gz static/main.wasm.br static/wasm_exec.js"
+
+[tasks.lint]
+description = "Run Go linter"
+run = "golangci-lint run"
+
+[tasks.test]
+description = "Run Go tests (excluding WASM-only packages)"
+run = """
+#!/bin/bash
+go test ./cmd/devserver/... ./cmd/mockserver/... ./cmd/serve/... ./internal/auth/... ./internal/rate/... ./internal/types/...
+"""
+
+[tasks.format]
+description = "Format Go code"
+run = "go fmt ./..."
+
+[tasks.tidy]
+description = "Tidy Go module dependencies"
+run = """
+go get -u ./...
+go mod tidy
+"""
+
+[tasks.all]
+description = "Run format, lint, and test"
+depends = ["format", "lint", "test"]

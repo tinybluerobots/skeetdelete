@@ -1,0 +1,22 @@
+*.wasm
+*.wasm.gz
+*.wasm.br
+wasm_exec.js
+static/wasm_exec.js
+static/main.wasm
+debug
+*.test
+.vendor
+.playwright-mcp/
+.sisyphus/
+wasm
+skeetdelete-home.png
+node_modules
+test-results
+
+# Dev artifacts
+devserver
+mockserver
+serve
+wasm
+ui-test-*.png
