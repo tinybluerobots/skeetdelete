@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"sync"
 	"syscall/js"
 	"time"
@@ -27,9 +28,13 @@ var (
 	loginResult   string
 	loginPending  bool
 
-	skeetDelFn  js.Func
-	skeetCnlFn  js.Func
-	skeetProgFn js.Func
+	recordsMu   sync.Mutex
+	cachedRecords []types.RecordToDelete
+
+	skeetDelFn    js.Func
+	skeetCnlFn    js.Func
+	skeetProgFn   js.Func
+	skeetPrevFn   js.Func
 )
 
 func main() {
@@ -45,10 +50,12 @@ func main() {
 	skeetDelFn = js.FuncOf(handleSkeetDelete)
 	skeetCnlFn = js.FuncOf(handleSkeetCancel)
 	skeetProgFn = js.FuncOf(handleGetProgress)
+	skeetPrevFn = js.FuncOf(handleGetPreview)
 
 	js.Global().Set("skeetDelete", skeetDelFn)
 	js.Global().Set("skeetCancel", skeetCnlFn)
 	js.Global().Set("skeetGetProgress", skeetProgFn)
+	js.Global().Set("skeetGetPreview", skeetPrevFn)
 
 	logToJS("SkeetDelete WASM loaded")
 
@@ -141,6 +148,10 @@ func handleCleanup(cfg js.Value) interface{} {
 	loginResult = ""
 	loginResultMu.Unlock()
 
+	recordsMu.Lock()
+	cachedRecords = nil
+	recordsMu.Unlock()
+
 	var cleanupTypes []string
 	if ct := cfg.Get("cleanupTypes"); ct.Truthy() {
 		length := ct.Length()
@@ -202,6 +213,34 @@ func handleGetProgress(this js.Value, args []js.Value) interface{} {
 	return jsonString(tracker.Get())
 }
 
+func handleGetPreview(this js.Value, args []js.Value) interface{} {
+	limit := 20
+	if len(args) > 0 && args[0].Truthy() {
+		limit = args[0].Int()
+		if limit <= 0 {
+			limit = 20
+		}
+	}
+
+	recordsMu.Lock()
+	recs := make([]types.RecordToDelete, len(cachedRecords))
+	copy(recs, cachedRecords)
+	recordsMu.Unlock()
+
+	sort.Slice(recs, func(i, j int) bool {
+		return recs[i].CreatedAt > recs[j].CreatedAt
+	})
+
+	if len(recs) > limit {
+		recs = recs[:limit]
+	}
+
+	return jsonString(map[string]interface{}{
+		"records": recs,
+		"total":   len(cachedRecords),
+	})
+}
+
 func runCleanup(ctx context.Context, req types.CleanupRequest) {
 	defer func() {
 		cancelMu.Lock()
@@ -233,6 +272,10 @@ func runCleanup(ctx context.Context, req types.CleanupRequest) {
 		}
 		return
 	}
+
+	recordsMu.Lock()
+	cachedRecords = records
+	recordsMu.Unlock()
 
 	select {
 	case <-ctx.Done():

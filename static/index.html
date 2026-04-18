@@ -481,6 +481,79 @@
         .mt-1 { margin-top: 1rem; }
         .hidden { display: none; }
 
+        .preview-section {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .preview-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .preview-count {
+            font-size: 0.75rem;
+            font-family: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+            color: var(--text-dim);
+        }
+
+        .preview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .preview-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .preview-item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-item-type {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .preview-item-date {
+            font-size: 0.7rem;
+            font-family: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+            color: var(--text-dim);
+        }
+
+        .preview-item-text {
+            color: var(--text);
+            line-height: 1.4;
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .skip-nav {
             position: absolute;
             top: -40px;
@@ -687,6 +760,13 @@
                         </div>
                     </div>
                     <div class="status-line mt-1" id="result-message"></div>
+                    <div class="preview-section hidden" id="preview-section">
+                        <div class="preview-header">
+                            <span class="preview-label">Newest records to delete</span>
+                            <span class="preview-count" id="preview-count"></span>
+                        </div>
+                        <div class="preview-list" id="preview-list"></div>
+                    </div>
                     <div class="btn-row mt-1">
                         <button class="btn btn-danger hidden" id="btn-run-real" onclick="handleRunForReal()">Delete for Real</button>
                         <button class="btn btn-primary" onclick="handleReset()">Done</button>
@@ -824,6 +904,7 @@
             document.getElementById('result-card').classList.remove('visible');
             document.getElementById('config-card').classList.remove('hidden');
             document.getElementById('btn-run-real').classList.add('hidden');
+            document.getElementById('preview-section').classList.add('hidden');
             if (progressInterval) {
                 clearInterval(progressInterval);
                 progressInterval = null;
@@ -880,11 +961,64 @@
                     const btnRunReal = document.getElementById('btn-run-real');
                     if (p.is_dry_run && p.state === 'completed') {
                         btnRunReal.classList.remove('hidden');
+                        loadPreview();
                     } else {
                         btnRunReal.classList.add('hidden');
+                        document.getElementById('preview-section').classList.add('hidden');
                     }
                 }, 500);
             }
+        }
+
+        function loadPreview() {
+            if (typeof skeetGetPreview !== 'function') return;
+            const raw = skeetGetPreview(20);
+            if (!raw) return;
+            try {
+                const data = JSON.parse(raw);
+                const section = document.getElementById('preview-section');
+                const list = document.getElementById('preview-list');
+                const count = document.getElementById('preview-count');
+
+                if (!data.records || data.records.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+
+                count.textContent = 'showing ' + data.records.length + ' of ' + data.total;
+                list.innerHTML = '';
+
+                data.records.forEach(rec => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'preview-item-meta';
+
+                    const type = document.createElement('span');
+                    type.className = 'preview-item-type';
+                    type.textContent = rec.record_type.replace(/_/g, ' ');
+
+                    const date = document.createElement('span');
+                    date.className = 'preview-item-date';
+                    date.textContent = rec.created_at ? rec.created_at.split('T')[0] : '';
+
+                    meta.appendChild(type);
+                    meta.appendChild(date);
+                    item.appendChild(meta);
+
+                    if (rec.text) {
+                        const text = document.createElement('div');
+                        text.className = 'preview-item-text';
+                        text.textContent = rec.text;
+                        item.appendChild(text);
+                    }
+
+                    list.appendChild(item);
+                });
+
+                section.classList.remove('hidden');
+            } catch(e) {}
         }
 
         function showError(msg) {

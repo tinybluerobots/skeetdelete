@@ -233,6 +233,7 @@ func filterPost(post *bsky.FeedPost, collection, rkey string, cutoff time.Time, 
 			Rkey:       rkey,
 			RecordType: string(types.RecordTypePostMedia),
 			CreatedAt:  createdAt.Format(time.RFC3339),
+			Text:       post.Text,
 		}
 	}
 
@@ -244,6 +245,7 @@ func filterPost(post *bsky.FeedPost, collection, rkey string, cutoff time.Time, 
 		Rkey:       rkey,
 		RecordType: string(types.RecordTypePost),
 		CreatedAt:  createdAt.Format(time.RFC3339),
+		Text:       post.Text,
 	}
 }
 

@@ -48,6 +48,7 @@ type RecordToDelete struct {
 	Rkey       string `json:"rkey"`
 	RecordType string `json:"record_type"`
 	CreatedAt  string `json:"created_at"`
+	Text       string `json:"text,omitempty"`
 }
 
 // Progress represents the current cleanup progress.
