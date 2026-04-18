@@ -6,30 +6,77 @@
     <meta name="color-scheme" content="dark light">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
     <title>SkeetDelete - Bluesky Repo Cleanup</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <style>
         :root {
-            --bg: #1a1a2e;
-            --surface: #16213e;
-            --surface2: #0f3460;
-            --primary: #0088a8;
-            --primary-hover: #007090;
-            --danger: #c62d3a;
-            --danger-hover: #a8232f;
-            --text: #e8e8e8;
-            --text-dim: #a0a0a0;
-            --text-inverse: #ffffff;
-            --success: #2ec4b6;
-            --warning: #ff9f1c;
-            --border: #2a2a4a;
-            --danger-bg-subtle: rgba(198, 45, 58, 0.15);
-            --warning-bg-subtle: rgba(255, 159, 28, 0.15);
+            --bg:               oklch(0.15 0.02 265);
+            --surface:          oklch(0.19 0.02 265);
+            --surface2:         oklch(0.23 0.03 265);
+            --surface-elevated: oklch(0.24 0.03 265);
+            --primary:          oklch(0.47 0.12 195);
+            --primary-hover:    oklch(0.42 0.14 195);
+            --danger:           oklch(0.50 0.15 25);
+            --danger-hover:     oklch(0.45 0.16 25);
+            --text:             oklch(0.92 0.01 265);
+            --text-dim:         oklch(0.65 0.01 265);
+            --text-inverse:     oklch(0.98 0.005 265);
+            --success:          oklch(0.70 0.15 165);
+            --warning:          oklch(0.75 0.15 70);
+            --border:           rgba(255,255,255,0.08);
+            --border-prominent: rgba(255,255,255,0.12);
+            --accent-glow:      oklch(0.47 0.12 195 / 15%);
+            --danger-bg-subtle: rgba(198, 45, 58, 0.12);
+            --warning-bg-subtle:rgba(255, 159, 28, 0.10);
+        }
+
+        @font-face {
+            font-family: 'Geist';
+            font-style: normal;
+            font-display: swap;
+            font-weight: 400;
+            src: url('https://cdn.jsdelivr.net/fontsource/fonts/geist@latest/latin-400-normal.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: 'Geist';
+            font-style: normal;
+            font-display: swap;
+            font-weight: 600;
+            src: url('https://cdn.jsdelivr.net/fontsource/fonts/geist@latest/latin-600-normal.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: 'Geist';
+            font-style: normal;
+            font-display: swap;
+            font-weight: 700;
+            src: url('https://cdn.jsdelivr.net/fontsource/fonts/geist@latest/latin-700-normal.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: 'Geist Mono';
+            font-style: normal;
+            font-display: swap;
+            font-weight: 400;
+            src: url('https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-400-normal.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: 'Geist Mono';
+            font-style: normal;
+            font-display: swap;
+            font-weight: 700;
+            src: url('https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-700-normal.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(ellipse 50% 35% at 10% 5%, oklch(0.22 0.05 250 / 25%), transparent),
+                var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -42,23 +89,40 @@
         }
 
         h1 {
-            font-size: 1.75rem;
-            margin-bottom: 0.25rem;
-            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            margin-bottom: 0.125rem;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 2rem;
+            height: 2px;
+            background: var(--primary);
+            margin-top: 0.375rem;
+            border-radius: 1px;
         }
 
         .subtitle {
             color: var(--text-dim);
             margin-bottom: 2rem;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            letter-spacing: 0.01em;
+            line-height: 1.5;
         }
 
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.04);
         }
 
         .card h2 {
@@ -85,7 +149,8 @@
             color: var(--text);
             font-size: 0.95rem;
             margin-bottom: 1rem;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, background 0.15s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         input:focus-visible,
@@ -116,11 +181,12 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .checkbox-item:hover {
-            border-color: var(--primary);
+            border-color: var(--border-prominent);
+            background: var(--surface-elevated);
         }
 
         .checkbox-item input[type="checkbox"] {
@@ -165,10 +231,10 @@
             position: absolute;
             cursor: pointer;
             inset: 0;
-            background: var(--surface2);
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 26px;
-            transition: 0.2s;
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .toggle-slider:before {
@@ -186,6 +252,7 @@
         .toggle input:checked + .toggle-slider {
             background: var(--primary);
             border-color: var(--primary);
+            box-shadow: 0 0 8px var(--accent-glow);
         }
 
         .toggle input:checked + .toggle-slider:before {
@@ -220,19 +287,23 @@
         .btn-primary {
             background: var(--primary);
             color: var(--text-inverse);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .btn-primary:hover:not(:disabled) {
             background: var(--primary-hover);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         .btn-danger {
             background: var(--danger);
             color: var(--text-inverse);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .btn-danger:hover:not(:disabled) {
             background: var(--danger-hover);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         .btn-secondary {
@@ -266,8 +337,9 @@
             width: 0%;
             background: var(--primary);
             border-radius: 8px;
-            transition: width 0.3s;
+            transition: width 0.3s ease;
             min-width: 0;
+            box-shadow: 0 0 12px var(--accent-glow);
         }
 
         .progress-stats {
@@ -284,10 +356,12 @@
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 1.5rem;
+        .stat-value, #days-ago {
+            font-family: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--primary);
+            letter-spacing: -0.02em;
         }
 
         .stat-label {
@@ -321,7 +395,7 @@
 
         .warning-box {
             background: var(--warning-bg-subtle);
-            border: 1px solid var(--warning);
+            border: 1px solid rgba(255, 159, 28, 0.3);
             border-radius: 8px;
             padding: 0.75rem 1rem;
             font-size: 0.85rem;
@@ -347,7 +421,7 @@
             display: inline-block;
             width: 40px;
             height: 40px;
-            border: 3px solid var(--border);
+            border: 2px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -425,18 +499,41 @@
 
         @media (prefers-color-scheme: light) {
             :root {
-                --bg: #f5f5f5;
-                --surface: #ffffff;
-                --surface2: #e8e8e8;
-                --text: #1a1a2e;
-                --text-dim: #666666;
-                --text-inverse: #ffffff;
-                --border: #d0d0d0;
+                --bg:               oklch(0.96 0.01 265);
+                --surface:          oklch(0.98 0.01 265);
+                --surface2:         oklch(0.93 0.01 265);
+                --surface-elevated: oklch(0.95 0.01 265);
+                --text:             oklch(0.20 0.02 265);
+                --text-dim:         oklch(0.45 0.01 265);
+                --text-inverse:     oklch(0.98 0.005 265);
+                --border:           rgba(0, 0, 0, 0.1);
+                --border-prominent: rgba(0, 0, 0, 0.15);
                 --danger-bg-subtle: rgba(198, 45, 58, 0.08);
-                --warning-bg-subtle: rgba(255, 159, 28, 0.08);
+                --warning-bg-subtle:rgba(255, 159, 28, 0.08);
+            }
+            body {
+                background:
+                    radial-gradient(ellipse 50% 35% at 10% 5%, oklch(0.93 0.02 250 / 30%), transparent),
+                    var(--bg);
+            }
+            .card {
+                box-shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.08),
+                    0 0 0 1px rgba(0, 0, 0, 0.06);
+            }
+            input[type="text"],
+            input[type="password"],
+            input[type="number"] {
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+            }
+            .btn-primary {
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+            .btn-danger {
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
             }
             .toggle-slider:before {
-                background: var(--text-dim);
+                background: var(--text);
             }
             .toggle input:checked + .toggle-slider:before {
                 background: var(--text-inverse);
@@ -451,10 +548,13 @@
             .btn-row { flex-direction: column; }
             .btn-row .btn { width: 100%; }
             .toggle-row { flex-wrap: wrap; gap: 0.5rem; }
+            h1 { font-size: 1.5rem; }
+            h1::after { width: 1.5rem; }
         }
 
         @media (max-width: 360px) {
-            h1 { font-size: 1.5rem; }
+            h1 { font-size: 1.25rem; }
+            h1::after { width: 1.25rem; }
             .result-stats { grid-template-columns: 1fr; }
         }
     </style>
@@ -564,11 +664,14 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-value" id="result-deleted">0</div>
-                            <div class="stat-label">Records Deleted</div>
+                            <div class="stat-label" id="result-deleted-label">Records Deleted</div>
                         </div>
                     </div>
                     <div class="status-line mt-1" id="result-message"></div>
-                    <button class="btn btn-primary mt-1" onclick="handleReset()">Done</button>
+                    <div class="btn-row mt-1">
+                        <button class="btn btn-danger hidden" id="btn-run-real" onclick="handleRunForReal()">Delete for Real</button>
+                        <button class="btn btn-primary" onclick="handleReset()">Done</button>
+                    </div>
                 </div>
             </div>
 
@@ -701,10 +804,17 @@
             document.getElementById('progress-section').classList.remove('visible');
             document.getElementById('result-card').classList.remove('visible');
             document.getElementById('config-card').classList.remove('hidden');
+            document.getElementById('btn-run-real').classList.add('hidden');
             if (progressInterval) {
                 clearInterval(progressInterval);
                 progressInterval = null;
             }
+        }
+
+        function handleRunForReal() {
+            document.getElementById('dry-run').checked = false;
+            document.getElementById('dry-run').setAttribute('aria-checked', 'false');
+            handleStart();
         }
 
         function updateProgress() {
@@ -737,8 +847,23 @@
                     document.getElementById('result-title').textContent =
                         p.state === 'cancelled' ? 'Cancelled' : (p.is_dry_run ? 'Dry Run Complete' : 'Cleanup Complete');
                     document.getElementById('result-found').textContent = p.records_found;
-                    document.getElementById('result-deleted').textContent = p.records_deleted;
+                    const resultDeletedLabel = document.getElementById('result-deleted-label');
+                    if (p.is_dry_run) {
+                        resultDeletedLabel.textContent = 'Would Delete';
+                        document.getElementById('result-deleted').textContent = p.records_found;
+                    } else {
+                        resultDeletedLabel.textContent = 'Records Deleted';
+                        document.getElementById('result-deleted').textContent = p.records_deleted;
+                    }
                     document.getElementById('result-message').textContent = p.current_action || '';
+
+                    // Show "Delete for Real" button only after a successful dry run
+                    const btnRunReal = document.getElementById('btn-run-real');
+                    if (p.is_dry_run && p.state === 'completed') {
+                        btnRunReal.classList.remove('hidden');
+                    } else {
+                        btnRunReal.classList.add('hidden');
+                    }
                 }, 500);
             }
         }
