@@ -8,9 +8,9 @@ import (
 
 	atproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/xrpc"
-	"github.com/jon-cooper/skeetdelete/internal/progress"
-	"github.com/jon-cooper/skeetdelete/internal/rate"
-	"github.com/jon-cooper/skeetdelete/internal/types"
+	"github.com/tinybluerobots/skeetdelete/internal/progress"
+	"github.com/tinybluerobots/skeetdelete/internal/rate"
+	"github.com/tinybluerobots/skeetdelete/internal/types"
 )
 
 type AuthProvider interface {

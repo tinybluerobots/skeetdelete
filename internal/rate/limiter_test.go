@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jon-cooper/skeetdelete/internal/types"
+	"github.com/tinybluerobots/skeetdelete/internal/types"
 )
 
 func TestCanMakeRequestReturnsTrueWhenUnderLimits(t *testing.T) {

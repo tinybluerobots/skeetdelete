@@ -1,4 +1,4 @@
-module github.com/jon-cooper/skeetdelete
+module github.com/tinybluerobots/skeetdelete
 
 go 1.26.2
 

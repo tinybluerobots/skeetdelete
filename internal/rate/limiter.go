@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jon-cooper/skeetdelete/internal/types"
+	"github.com/tinybluerobots/skeetdelete/internal/types"
 	"golang.org/x/time/rate"
 )
 
