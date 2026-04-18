@@ -9,7 +9,7 @@ debug
 .vendor
 .playwright-mcp/
 .sisyphus/
-wasm
+/wasm
 skeetdelete-home.png
 node_modules
 test-results
@@ -18,5 +18,5 @@ test-results
 devserver
 mockserver
 serve
-wasm
+/wasm
 ui-test-*.png
