@@ -554,6 +554,17 @@
             overflow: hidden;
         }
 
+        .preview-item-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+            font-size: 0.75rem;
+        }
+
+        .preview-item-link:hover {
+            text-decoration: underline;
+        }
+
         .skip-nav {
             position: absolute;
             top: -40px;
@@ -970,6 +981,36 @@
             }
         }
 
+        function formatPreviewText(rec) {
+            if (!rec.text) return null;
+            if (rec.record_type === 'like' || rec.record_type === 'repost') {
+                const m = rec.text.match(/^at:\/\/(did:[^/]+)\/([^/]+)\/([^/]+)$/);
+                if (m) {
+                    const [, did, coll, rkey] = m;
+                    const href = 'https://bsky.app/profile/' + did + '/' + coll.split('.').pop() + '/' + rkey;
+                    const a = document.createElement('a');
+                    a.href = href;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.className = 'preview-item-link';
+                    a.textContent = coll.split('.').pop() + '/' + rkey.slice(0, 12) + '…';
+                    return a;
+                }
+            }
+            if (rec.record_type === 'follow' || rec.record_type === 'listitem') {
+                const a = document.createElement('a');
+                a.href = 'https://bsky.app/profile/' + rec.text;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'preview-item-link';
+                a.textContent = rec.text.length > 30 ? rec.text.slice(0, 30) + '…' : rec.text;
+                return a;
+            }
+            const span = document.createElement('span');
+            span.textContent = rec.text;
+            return span;
+        }
+
         function loadPreview() {
             if (typeof skeetGetPreview !== 'function') return;
             const raw = skeetGetPreview(20);
@@ -1007,11 +1048,12 @@
                     meta.appendChild(date);
                     item.appendChild(meta);
 
-                    if (rec.text) {
-                        const text = document.createElement('div');
-                        text.className = 'preview-item-text';
-                        text.textContent = rec.text;
-                        item.appendChild(text);
+                    const content = formatPreviewText(rec);
+                    if (content) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'preview-item-text';
+                        wrap.appendChild(content);
+                        item.appendChild(wrap);
                     }
 
                     list.appendChild(item);

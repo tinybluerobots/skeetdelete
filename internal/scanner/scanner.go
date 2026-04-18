@@ -157,11 +157,16 @@ func filterRecord(rec *atproto.RepoListRecords_Record, collection, rkey string, 
 		if err != nil || createdAt.After(cutoff) {
 			return nil
 		}
+		text := ""
+		if v.Subject != nil {
+			text = v.Subject.Uri
+		}
 		return &types.RecordToDelete{
 			Collection: collection,
 			Rkey:       rkey,
 			RecordType: string(types.RecordTypeLike),
 			CreatedAt:  createdAt.Format(time.RFC3339),
+			Text:       text,
 		}
 	case *bsky.FeedRepost:
 		if !cleanupSet[string(types.RecordTypeRepost)] {
@@ -171,11 +176,16 @@ func filterRecord(rec *atproto.RepoListRecords_Record, collection, rkey string, 
 		if err != nil || createdAt.After(cutoff) {
 			return nil
 		}
+		text := ""
+		if v.Subject != nil {
+			text = v.Subject.Uri
+		}
 		return &types.RecordToDelete{
 			Collection: collection,
 			Rkey:       rkey,
 			RecordType: string(types.RecordTypeRepost),
 			CreatedAt:  createdAt.Format(time.RFC3339),
+			Text:       text,
 		}
 	case *bsky.GraphFollow:
 		if !cleanupSet[string(types.RecordTypeFollow)] {
@@ -190,6 +200,7 @@ func filterRecord(rec *atproto.RepoListRecords_Record, collection, rkey string, 
 			Rkey:       rkey,
 			RecordType: string(types.RecordTypeFollow),
 			CreatedAt:  createdAt.Format(time.RFC3339),
+			Text:       v.Subject,
 		}
 	case *bsky.GraphListitem:
 		if !cleanupSet[string(types.RecordTypeListItem)] {
@@ -204,6 +215,7 @@ func filterRecord(rec *atproto.RepoListRecords_Record, collection, rkey string, 
 			Rkey:       rkey,
 			RecordType: string(types.RecordTypeListItem),
 			CreatedAt:  createdAt.Format(time.RFC3339),
+			Text:       v.Subject,
 		}
 	case *bsky.FeedPostgate, *bsky.FeedThreadgate:
 		return nil
